@@ -1,3 +1,5 @@
+import json
+import os
 import pickle
 from pathlib import Path
 from typing import Dict, List, Any, Union
@@ -5,6 +7,9 @@ from typing import Dict, List, Any, Union
 import torch
 import yaml
 
+sss = '!"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~’“”…'
+def remove_punc(a_string: str)-> str:
+    return a_string.translate(str.maketrans('', '', sss))
 
 def read_metafile(path: str) -> Dict[str, str]:
     text_dict = {}
@@ -15,6 +20,15 @@ def read_metafile(path: str) -> Dict[str, str]:
             text_dict[text_id] = text.strip()
     return text_dict
 
+def read_lyric(path:str) ->Dict[str, str]:
+    text_dict = {}
+    file_list = os.listdir(path)
+    for file in file_list:
+        with open(f"{path}/{file}",'r') as f:
+            data = json.load(f)
+            text = remove_punc(' '.join([i["d"] for s in data for i in s['l']])).lower()
+            text_dict[file.replace('.json','')] = text
+    return text_dict
 
 def read_config(path: str) -> Dict[str, Any]:
     with open(path, 'r') as stream:

@@ -10,7 +10,7 @@ import tqdm
 from dfa.audio import Audio
 from dfa.paths import Paths
 from dfa.text import Tokenizer
-from dfa.utils import get_files, read_config, pickle_binary, read_metafile
+from dfa.utils import get_files, read_config, pickle_binary, read_metafile, read_lyric
 
 
 class Preprocessor:
@@ -64,7 +64,8 @@ if __name__ == '__main__':
     print(f'Config: {args.config}\n'
           f'Target data directory: {paths.data_dir}')
     
-    text_dict = read_metafile(paths.metadata_path)
+    text_dict = read_lyric(paths.text_path)
+    # text_dict = read_metafile(paths.metadata_path)
     symbols = set()
     for text in text_dict.values():
         symbols.update(set(text))
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     if paths.precomputed_mels:
         audio_files = get_files(paths.precomputed_mels, extension='.npy')
     else:
-        audio_files = get_files(paths.dataset_dir, extension='.wav')
+        audio_files = get_files(paths.wav_path, extension='.wav')
 
     audio_files = [x for x in audio_files if x.stem in text_dict]
     tokenizer = Tokenizer(symbols)

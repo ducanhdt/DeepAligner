@@ -3,9 +3,11 @@ from pathlib import Path
 
 class Paths:
     
-    def __init__(self, data_dir: str, checkpoint_dir: str, dataset_dir: str, precomputed_mels: str, metadata_path: str):
+    def __init__(self, data_dir: str, checkpoint_dir: str, dataset_dir: str, precomputed_mels: str, metadata_path: str, wav_path: str, text_path:str):
         self.data_dir = Path(data_dir)
         self.dataset_dir = dataset_dir
+        self.wav_path = wav_path
+        self.text_path = text_path
         self.metadata_path = Path(metadata_path)
         self.mel_dir = self.data_dir / 'mels'
         self.token_dir = self.data_dir / 'tokens'
@@ -29,4 +31,6 @@ class Paths:
             checkpoint_dir=config['checkpoint_dir'],
             dataset_dir=config['dataset_dir'],
             precomputed_mels=config['precomputed_mels'],
+            wav_path=config['wav_path'],
+            text_path=config['text_path'],
         )
