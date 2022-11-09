@@ -3,7 +3,7 @@ from multiprocessing import cpu_count
 from multiprocessing.pool import Pool
 from pathlib import Path
 from typing import Dict, Union
-
+import whisper
 import numpy as np
 import tqdm
 
@@ -27,7 +27,8 @@ class Preprocessor:
         self.tokenizer = tokenizer
         self.text_dict = text_dict
         self.mel_dim_last = mel_dim_last
-    
+        self.model = whisper.load_model("tiny")
+        
     def __call__(self, file_path: Path) -> Dict[str, Union[str, int]]:
         item_id = file_path.stem
         if self.paths.precomputed_mels:
@@ -38,9 +39,16 @@ class Preprocessor:
                 f'Expected mel shape to be of (None, {self.audio.n_mels}), but was: {mel.shape}! ' \
                 f'Consider setting config/audio/mel_dim_last: {not self.mel_dim_last}'
         else:
-            wav = self.audio.load_wav(file_path)
-            mel = self.audio.wav_to_mel(wav)
+            # wav = self.audio.load_wav(file_path)
+            # mel = self.audio.wav_to_mel(wav)
+            audio = whisper.load_audio(file_path)
+            audio = whisper.pad_or_trim(audio)
+            mel = whisper.log_mel_spectrogram(audio).unsqueeze(0).to(self.model.device)
+            mel = self.model.embed_audio(mel).cpu().detach().numpy()[0]
 
+            # make log-Mel spectrogram and move to the same device as the model
+            # print(mel.shape)
+        
         np.save(self.paths.mel_dir / f'{item_id}.npy', mel, allow_pickle=False)
         text = self.text_dict[item_id]
         tokens = np.array(self.tokenizer(text)).astype(np.int32)
@@ -83,8 +91,9 @@ if __name__ == '__main__':
     pool = Pool(processes=args.num_workers)
     mapper = pool.imap_unordered(preprocessor, audio_files)
     dataset = []
-    for i, item in tqdm.tqdm(enumerate(mapper), total=len(audio_files)):
-        dataset.append(item)
+    # for i, item in tqdm.tqdm(enumerate(mapper), total=len(audio_files)):
+    for i, item in tqdm.tqdm(enumerate(audio_files), total=len(audio_files)):
+        dataset.append(preprocessor(item))
     
     pickle_binary(dataset, paths.data_dir / 'dataset.pkl')
     pickle_binary(symbols, paths.data_dir / 'symbols.pkl')
