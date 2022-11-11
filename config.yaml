@@ -5,13 +5,13 @@ paths:
   wav_path: ../train/songs
   text_path: ../train/labels
   precomputed_mels:                            # replaces dataset_dir if set and points to already preprocessed mels
-  data_dir: dfa_data                           # directory to store preprocessed data
+  data_dir: dfa_data_whisper                           # directory to store preprocessed data
   checkpoint_dir: dfa_checkpoints              # directory for model checkpoints and tensorboard
 
 audio:
   sample_rate: 22050
   n_filters: 1024
-  n_mels: 80
+  n_mels: 384
   win_length: 1024
   hop_length: 256
   fmin: 0
