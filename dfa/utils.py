@@ -20,7 +20,7 @@ def read_metafile(path: str) -> Dict[str, str]:
             text_dict[text_id] = text.strip()
     return text_dict
 
-def read_lyric(path:str) ->Dict[str, str]:
+def read_lyric(path:str,path2 = None) ->Dict[str, str]:
     text_dict = {}
     file_list = os.listdir(path)
     for file in file_list:
@@ -28,6 +28,14 @@ def read_lyric(path:str) ->Dict[str, str]:
             data = json.load(f)
             text = remove_punc(' '.join([i["d"] for s in data for i in s['l']])).lower()
             text_dict[file.replace('.json','')] = text
+    
+    if path2:
+        file_list = os.listdir(path2)
+        for file in file_list:
+            with open(f"{path2}/{file}",'r') as f:
+                data = f.read().strip().lower()
+                text_dict[file.replace('.txt','')] = text
+    
     return text_dict
 
 def read_config(path: str) -> Dict[str, Any]:

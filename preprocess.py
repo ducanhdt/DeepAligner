@@ -1,4 +1,5 @@
 import argparse
+import json
 from multiprocessing import cpu_count
 from multiprocessing.pool import Pool
 from pathlib import Path
@@ -67,12 +68,15 @@ if __name__ == '__main__':
     config = read_config(args.config)
     paths = Paths.from_config(config['paths'])
     audio = Audio.from_config(config['audio'])
+    
     mel_dim_last = config['preprocessing']['mel_dim_last']
     
     print(f'Config: {args.config}\n'
           f'Target data directory: {paths.data_dir}')
     
-    text_dict = read_lyric(paths.text_path)
+    text_dict = read_lyric(paths.text_path, paths.text_test_path)
+    with open("text_dict.json",'w') as f:
+        json.dump(text_dict,f,ensure_ascii=False,indent=4)
     # text_dict = read_metafile(paths.metadata_path)
     symbols = set()
     for text in text_dict.values():
@@ -83,7 +87,8 @@ if __name__ == '__main__':
         audio_files = get_files(paths.precomputed_mels, extension='.npy')
     else:
         audio_files = get_files(paths.wav_path, extension='.wav')
-
+        audio_files.extend(get_files(paths.wav_test_path, extension='.wav'))
+        
     audio_files = [x for x in audio_files if x.stem in text_dict]
     tokenizer = Tokenizer(symbols)
     preprocessor = Preprocessor(audio=audio, tokenizer=tokenizer, paths=paths,

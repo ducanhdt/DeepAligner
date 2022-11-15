@@ -3,7 +3,7 @@ from pathlib import Path
 
 class Paths:
     
-    def __init__(self, data_dir: str, checkpoint_dir: str, dataset_dir: str, precomputed_mels: str, metadata_path: str, wav_path: str, text_path:str):
+    def __init__(self, data_dir: str, checkpoint_dir: str, dataset_dir: str, precomputed_mels: str, metadata_path: str, wav_path: str, text_path:str,wav_test_path:str, text_test_path:str):
         self.data_dir = Path(data_dir)
         self.dataset_dir = dataset_dir
         self.wav_path = wav_path
@@ -15,6 +15,8 @@ class Paths:
         if self.precomputed_mels is not None:
             self.precomputed_mels = Path(precomputed_mels)
         self.checkpoint_dir = Path(checkpoint_dir)
+        self.text_test_path =text_test_path
+        self.wav_test_path=wav_test_path
         self.create_dirs()
     
     def create_dirs(self):
@@ -33,4 +35,7 @@ class Paths:
             precomputed_mels=config['precomputed_mels'],
             wav_path=config['wav_path'],
             text_path=config['text_path'],
+            text_test_path=config['text_test_path'],
+            wav_test_path=config["wav_test_path"],
+            
         )
