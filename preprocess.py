@@ -43,11 +43,13 @@ class Preprocessor:
             # wav = self.audio.load_wav(file_path)
             # mel = self.audio.wav_to_mel(wav)
             audio = whisper.load_audio(file_path)
+            l =int(len(audio)/320)
             audio = whisper.pad_or_trim(audio)
             mel = whisper.log_mel_spectrogram(audio).unsqueeze(0).to(self.model.device)
-            mel = self.model.embed_audio(mel).cpu().detach().numpy()[0]
-            # print(mel.shape)
-            # make log-Mel spectrogram and move to the same device as the model
+            mel = self.model.embed_audio(mel).cpu().detach().numpy()[0][:l,]
+            assert mel.shape[1] == self.audio.n_mels, \
+                    f'Expected mel shape to be of (None, {self.audio.n_mels}), but was: {mel.shape}! ' \
+                    f'Consider setting config/audio/mel_dim_last: {not self.mel_dim_last}'
             # print(mel.shape)
         
         np.save(self.paths.mel_dir / f'{item_id}.npy', mel, allow_pickle=False)
@@ -75,6 +77,7 @@ if __name__ == '__main__':
           f'Target data directory: {paths.data_dir}')
     
     text_dict = read_lyric(paths.text_path, paths.text_test_path)
+    # print(text_dict)
     with open("text_dict.json",'w') as f:
         json.dump(text_dict,f,ensure_ascii=False,indent=4)
     # text_dict = read_metafile(paths.metadata_path)
@@ -93,8 +96,8 @@ if __name__ == '__main__':
     tokenizer = Tokenizer(symbols)
     preprocessor = Preprocessor(audio=audio, tokenizer=tokenizer, paths=paths,
                                 text_dict=text_dict, mel_dim_last=mel_dim_last)
-    pool = Pool(processes=args.num_workers)
-    mapper = pool.imap_unordered(preprocessor, audio_files)
+    # pool = Pool(processes=args.num_workers)
+    # mapper = pool.imap_unordered(preprocessor, audio_files)
     dataset = []
     # for i, item in tqdm.tqdm(enumerate(mapper), total=len(audio_files)):
     for i, item in tqdm.tqdm(enumerate(audio_files), total=len(audio_files)):
