@@ -2,3 +2,9 @@
 dfa_data
 __pycache__
 dfa_data_whisper/
+submit
+dfa_checkpoints
+*.zip
+*.json
+config.yaml
+output

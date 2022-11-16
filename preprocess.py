@@ -50,11 +50,12 @@ class Preprocessor:
             assert mel.shape[1] == self.audio.n_mels, \
                     f'Expected mel shape to be of (None, {self.audio.n_mels}), but was: {mel.shape}! ' \
                     f'Consider setting config/audio/mel_dim_last: {not self.mel_dim_last}'
-            # print(mel.shape)
+
         
         np.save(self.paths.mel_dir / f'{item_id}.npy', mel, allow_pickle=False)
         text = self.text_dict[item_id]
         tokens = np.array(self.tokenizer(text)).astype(np.int32)
+        # print("token:",len(tokens))
         np.save(self.paths.token_dir / f'{item_id}.npy', tokens, allow_pickle=False)
         return {'item_id': item_id, 'tokens_len': tokens.shape[0], 'mel_len': mel.shape[0]}
 
@@ -81,6 +82,7 @@ if __name__ == '__main__':
     with open("text_dict.json",'w') as f:
         json.dump(text_dict,f,ensure_ascii=False,indent=4)
     # text_dict = read_metafile(paths.metadata_path)
+    '''
     symbols = set()
     for text in text_dict.values():
         symbols.update(set(text))
@@ -106,3 +108,5 @@ if __name__ == '__main__':
     pickle_binary(dataset, paths.data_dir / 'dataset.pkl')
     pickle_binary(symbols, paths.data_dir / 'symbols.pkl')
     print('Preprocessing done.')
+
+    '''
