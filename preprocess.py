@@ -34,7 +34,7 @@ class Preprocessor:
         item_id = file_path.stem
         if self.paths.precomputed_mels:
             mel = np.load(self.paths.precomputed_mels / f'{item_id}.npy')
-            if not self.mel_dim_last:
+            if mel.shape[1] != self.audio.n_mels:
                 mel = mel.T
             assert mel.shape[1] == self.audio.n_mels, \
                 f'Expected mel shape to be of (None, {self.audio.n_mels}), but was: {mel.shape}! ' \
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     with open("text_dict.json",'w') as f:
         json.dump(text_dict,f,ensure_ascii=False,indent=4)
     # text_dict = read_metafile(paths.metadata_path)
-    '''
+    
     symbols = set()
     for text in text_dict.values():
         symbols.update(set(text))
@@ -108,5 +108,3 @@ if __name__ == '__main__':
     pickle_binary(dataset, paths.data_dir / 'dataset.pkl')
     pickle_binary(symbols, paths.data_dir / 'symbols.pkl')
     print('Preprocessing done.')
-
-    '''

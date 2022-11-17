@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     with open('text_dict.json','r') as f:
         text_dict= json.load(f)
-    
+    sequence_dict = {}
     total_iou = {}
     for file_id in tqdm(os.listdir("../train/labels")):
         file_id = file_id.replace(".json","")
@@ -49,6 +49,7 @@ if __name__ == '__main__':
         pred_len = pred.shape[0]
         
         durations_beam, sequences = extract_durations_beam(target, pred, 5)
+        sequence_dict[file_id] = tokenizer.decode(target[sequences[0][0]])
         tmp = np.cumsum(np.pad(durations_beam[0], (1, 0)))
         with open(f"../train/labels-convert/{file_id}.json",'r') as f:
             result = json.load(f)
@@ -56,8 +57,12 @@ if __name__ == '__main__':
         for seg in result:
             for word in seg['l']:
                 try:
-                    word['ps'] = int(tmp[word['st']-1]*20)
-                    word['pe'] = int(tmp[word['et']+1]*20)
+                    x = 100
+                    if tmp[word['st']]-tmp[word['st']-1]<x:
+                        word['ps'] = int(tmp[word['st']-1]*20)
+                    else:
+                        word['ps'] = int((tmp[word['st']]-x)*20)
+                    word['pe'] = int((tmp[word['et']]+tmp[word['et']+1])*10)
                 except:
                     word['ps'] = 0
                     word['pe'] = 0
@@ -68,4 +73,8 @@ if __name__ == '__main__':
             json.dump(result, f, indent=4, ensure_ascii=False)
         total_iou[file_id] = sum(sent_iou)/len(sent_iou)
     print(sum(total_iou.values())/len(total_iou))
+    with open(f"train_iou.json",'w') as f:
+        json.dump(total_iou, f, indent=4, ensure_ascii=False)
+    with open(f"sequence_dict.json",'w') as f:
+        json.dump(sequence_dict, f, indent=4, ensure_ascii=False)
         

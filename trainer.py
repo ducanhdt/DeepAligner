@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import torch
 import tqdm
@@ -43,9 +44,9 @@ class Trainer:
 
         for g in optim.param_groups:
             g['lr'] = lr
-
+        filter = {i.replace(".json") for i in os.listdir("../train/labels")}
         dataloader = new_dataloader(dataset_path=self.paths.data_dir / 'dataset.pkl', mel_dir=self.paths.mel_dir,
-                                    token_dir=self.paths.token_dir, batch_size=batch_size)
+                                    token_dir=self.paths.token_dir, batch_size=batch_size,filter=filter)
 
         start_epoch = model.get_step() // len(dataloader)
 

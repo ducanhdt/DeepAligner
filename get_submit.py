@@ -55,18 +55,18 @@ if __name__ == '__main__':
         sent_iou = []
         for seg in result:
             for i,word in enumerate(seg['l']):
-                # try:
+                try:
                     seg['l'][i] = {
                             "d":word['d'],
                             "s":int(tmp[word['st']-1]*20),
-                            "e":int(tmp[word['et']+1]*20),
+                            "e":int(tmp[word['et']]*20),
                             }
-                # except:
-                #     word = {
-                #             "d":word['d'],
-                #             "s":0,
-                #             "e":0,
-                #             }
+                except:
+                    word = {
+                            "d":word['d'],
+                            "s":0,
+                            "e":0,
+                            }
 
         with open(f"../public_test_lyrics_json/public_test/submit/{file_id}.json",'w') as f:
             json.dump(result, f, indent=4, ensure_ascii=False)
