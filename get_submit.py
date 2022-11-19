@@ -38,7 +38,7 @@ if __name__ == '__main__':
         text_dict= json.load(f)
     
     total_iou = {}
-    for file_id in tqdm(os.listdir("../public_test_lyrics_json/public_test/json_lyrics-convert")):
+    for file_id in tqdm(os.listdir("../public_test/new_labels_json-convert")):
         file_id = file_id.replace(".json","")
         text = text_dict[file_id]
         target = np.array(tokenizer(text))
@@ -50,7 +50,7 @@ if __name__ == '__main__':
         
         durations_beam, sequences = extract_durations_beam(target, pred, 5)
         tmp = np.cumsum(np.pad(durations_beam[0], (1, 0)))
-        with open(f"../public_test_lyrics_json/public_test/json_lyrics-convert/{file_id}.json",'r') as f:
+        with open(f"../public_test/new_labels_json-convert/{file_id}.json",'r') as f:
             result = json.load(f)
         sent_iou = []
         for seg in result:
@@ -68,7 +68,7 @@ if __name__ == '__main__':
                             "e":0,
                             }
 
-        with open(f"../public_test_lyrics_json/public_test/submit/{file_id}.json",'w') as f:
+        with open(f"../public_test/submit/{file_id}.json",'w') as f:
             json.dump(result, f, indent=4, ensure_ascii=False)
 
         
