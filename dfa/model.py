@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-
+import whisper
 class BatchNormConv(nn.Module):
 
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int):
@@ -29,21 +29,31 @@ class Aligner(torch.nn.Module):
                  lstm_dim: int,
                  conv_dim: int) -> None:
         super().__init__()
+        
         self.register_buffer('step', torch.tensor(1, dtype=torch.int))
-        self.convs = nn.ModuleList([
-            BatchNormConv(n_mels, conv_dim, 5),
-            BatchNormConv(conv_dim, conv_dim, 5),
-            BatchNormConv(conv_dim, conv_dim, 5),
-        ])
-        self.rnn = torch.nn.LSTM(conv_dim, lstm_dim, batch_first=True, bidirectional=True)
-        self.lin = torch.nn.Linear(2 * lstm_dim, num_symbols)
-
+        W = whisper.load_model("tiny")
+        self.encoder = W.encoder
+        self.encoder.requires_grad = False
+        # for block in self.encoder.blocks[-2:]:
+        #     block.requires_grad = True
+        del W
+        # self.convs = nn.ModuleList([
+        #     BatchNormConv(n_mels, conv_dim, 5),
+        #     BatchNormConv(conv_dim, conv_dim, 5),
+        #     BatchNormConv(conv_dim, conv_dim, 5),
+        # ])
+        # self.rnn = torch.nn.LSTM(conv_dim, lstm_dim, batch_first=True, bidirectional=True)
+        # self.lin = torch.nn.Linear(2 * lstm_dim, num_symbols)
+        self.lin = torch.nn.Linear(384, num_symbols)
+    # def freeze(num):
+        
     def forward(self, x):
         if self.train:
             self.step += 1
-        for conv in self.convs:
-            x = conv(x)
-        x, _ = self.rnn(x)
+        # for conv in self.convs:
+        #     x = conv(x)
+        x = self.encoder(x)
+        # x, _ = self.rnn(x)
         x = self.lin(x)
         return x
 

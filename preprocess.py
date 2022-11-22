@@ -45,11 +45,11 @@ class Preprocessor:
             audio = whisper.load_audio(file_path)
             l =int(len(audio)/320)
             audio = whisper.pad_or_trim(audio)
-            mel = whisper.log_mel_spectrogram(audio).unsqueeze(0).to(self.model.device)
-            mel = self.model.embed_audio(mel).cpu().detach().numpy()[0][:l,]
-            assert mel.shape[1] == self.audio.n_mels, \
-                    f'Expected mel shape to be of (None, {self.audio.n_mels}), but was: {mel.shape}! ' \
-                    f'Consider setting config/audio/mel_dim_last: {not self.mel_dim_last}'
+            mel = whisper.log_mel_spectrogram(audio)
+            # mel = self.model.embed_audio(mel).cpu().detach().numpy()[0][:l,]
+            # assert mel.shape[1] == self.audio.n_mels, \
+            #         f'Expected mel shape to be of (None, {self.audio.n_mels}), but was: {mel.shape}! ' \
+            #         f'Consider setting config/audio/mel_dim_last: {not self.mel_dim_last}'
 
         
         np.save(self.paths.mel_dir / f'{item_id}.npy', mel, allow_pickle=False)
@@ -57,7 +57,7 @@ class Preprocessor:
         tokens = np.array(self.tokenizer(text)).astype(np.int32)
         # print("token:",len(tokens))
         np.save(self.paths.token_dir / f'{item_id}.npy', tokens, allow_pickle=False)
-        return {'item_id': item_id, 'tokens_len': tokens.shape[0], 'mel_len': mel.shape[0]}
+        return {'item_id': item_id, 'tokens_len': tokens.shape[0], 'mel_len': l}
 
 
 if __name__ == '__main__':
